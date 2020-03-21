@@ -1,0 +1,23 @@
+% Graph saved at Sat Mar 21 2020 16:56:24 GMT+0100 (czas środkowoeuropejski standardowy)
+n 100 100
+n 150 100
+n 200 100
+n 250 100
+n 300 100
+e 0 2 1
+e 0 1 0
+e 0 2 1
+e 0 3 1
+e 1 0 1
+e 1 3 0
+e 2 4 2
+e 2 0 2
+e 2 4 2
+e 2 0 2
+e 3 0 1
+e 3 1 -1
+e 3 4 1
+e 4 3 1
+e 4 2 1
+e 4 2 1
+
