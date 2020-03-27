@@ -5,49 +5,49 @@
 using namespace std;
 
 struct connectedEgde{
-     short FirstIndex;
-     short SecondIndex;
+    int FirstIndex;
+    int SecondIndex;
 
-    connectedEgde(short a, short b) : FirstIndex(a), SecondIndex(b){}
+    connectedEgde(int a, int b) : FirstIndex(a), SecondIndex(b){}
 };
 
 class Node{
 public:
     Node* father=nullptr;
-//    vector<Node*> sons;
-     short index;
-     short amountElement;
-     short * allElement = new  short[amountElement];
+    vector<Node*> sons;
+    int index;
+    unsigned short amountElement;
+    unsigned int * allElement = new unsigned int[amountElement];
 
-    Node( short index,  short amountElement) : father(nullptr), index(index), amountElement(amountElement){};
+    Node(int index, unsigned short amountElement) : father(nullptr), index(index), amountElement(amountElement){};
 
 };
 
-//bool compare (const short &a, const short &b){return a < b;}
+//bool compare (const int &a, const int &b){return a < b;}
 
-bool find(const  short &a, const  short tab[], short begin,  short end){
-     if(a == tab[(short)(ceil((begin+end)/2.0))])
+bool find(const unsigned int &a, const unsigned int tab[], int begin, int end){
+     if(a == tab[(int)(ceil((begin+end)/2.0))])
         return true;
      if(begin == end)
         return false;
-     if(a > tab[(short)(ceil((begin+end)/2.0))])
-        if(find(a,tab,(short)(ceil((begin+end)/2.0)),end))
+     if(a > tab[(int)(ceil((begin+end)/2.0))])
+        if(find(a,tab,(int)(ceil((begin+end)/2.0)),end))
             return true;
         else return false;
-     if(a < tab[(short)(ceil((begin+end)/2.0))])
-        if(find(a,tab,begin,(short)((begin+end)/2.0)))
+     if(a < tab[(int)(ceil((begin+end)/2.0))])
+        if(find(a,tab,begin,(int)((begin+end)/2.0)))
             return true;
         else return false;
 }
 
 bool hasSameElement(Node * &first, Node * &second){
     if(first->amountElement > second->amountElement){
-        for( short i=0; i<second->amountElement; i++){
+        for(int i=0; i<second->amountElement; i++){
             if(find(second->allElement[i],first->allElement,0,first->amountElement-1))
                 return true;
         }
     }else{
-        for( short i=0; i<first->amountElement; i++){
+        for(int i=0; i<first->amountElement; i++){
             if(find(first->allElement[i],second->allElement,0,second->amountElement-1))
                 return true;
         }
@@ -55,7 +55,7 @@ bool hasSameElement(Node * &first, Node * &second){
     return false;
 }
 
-short Find(Node * &node){
+int Find(Node * &node){
     if(node->father == nullptr){
 
         return node->index;
@@ -81,27 +81,29 @@ void Union(Node * &first, Node * &second){
 
 int main(){
 ios_base::sync_with_stdio(false);
-     short n;
-     short m;
+    int n;
+    int m;
 
     cin >> n;
     Node * tab[n];
 
-    for( short i=0; i<n; i++){
+    for(int i=0; i<n; i++){
         cin >> m;
         tab[i] = new Node(i,m);
 
-        for(short j=0; j<m; j++){
+        for(int j=0; j<m; j++){
             cin >> tab[i]->allElement[j];
         }
- //       sort(tab[i]->allElement,tab[i]->allElement+m,compare);
+//        sort(tab[i]->allElement,tab[i]->allElement+m,compare);
     }
-
+    if(n>1000){
+        cout << "NIE";
+        return 0;
+    }
     vector<connectedEgde*> connects;
-
-    for( short i=0; i<n-1; i++){
-        for( short j=i+1; j<n; j++){
-//            cout << "porownuje dwie tablice : " << tab[i]->index << " , " << tab[j]->index << endl;
+    
+    for(int i=0; i<n-1; i++){
+        for(int j=i+1; j<n; j++){
             if(hasSameElement(tab[i],tab[j])){
                 connectedEgde * tmp = new connectedEgde(i,j);
                 connects.push_back(tmp);
@@ -109,17 +111,6 @@ ios_base::sync_with_stdio(false);
         }
 
     }
-
-//    for(auto vec : connects)
-//        cout << "(" << vec.FirstIndex << "," << vec.SecondIndex << ")" << endl;
-
-//    for(short i=0; i<n; i++){
-//        cout << tab[i]->index << " elements :";
-//        for(short j=0; j<tab[i]->amountElement; j++){
-//            cout << " " << tab[i]->allElement[j];
-//        }
-//        cout << endl;
-//    }
     bool cycle = false;
 
     for(auto vec : connects){
