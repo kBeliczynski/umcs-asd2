@@ -1,0 +1,252 @@
+#include <iostream>
+
+using namespace std;
+
+struct Node{
+    string name;
+    unsigned short index;
+    bool color; // 1 - red , 0 - black
+    Node *l_son, *r_son, *father;
+
+    Node(){
+        l_son = r_son = father = NULL;
+        this->color = 1;
+    }
+};
+
+void modifyIndex(Node * node,int newVal, int oldVal, unsigned short *& tab, int size){
+    if(newVal < oldVal){
+        for(int i=0; i<size; i++){
+            if(tab[i] >= newVal && tab[i] < oldVal)
+              tab[i]++;
+        }
+    }else{
+        for(int i=0; i<size; i++){
+            if(tab[i] > oldVal && tab[i] <= newVal)
+                tab[i]--;
+        }
+    }
+    tab[node->index] = newVal;
+}
+
+class RBTree{
+    Node * root;
+    Node * guard;
+    int size;
+public:
+    RBTree(){
+        size=0;
+        guard = new Node;
+        guard->color = 0; // black
+        guard->l_son = guard->r_son = NULL;
+        root = guard;
+    }
+
+    int getSize(){return size;}
+
+    Node * getRoot(){return root;}
+
+    void modifyAllIndex(Node * node,unsigned short *& tab){
+        if(node->l_son != NULL)
+                modifyAllIndex(node->l_son,tab);
+        node->index = tab[node->index];
+        if(node->r_son != NULL)
+            modifyAllIndex(node->r_son,tab);
+    }
+
+    void createTab(Node * node,string *& tab){
+        if(node->l_son != NULL && node->l_son != guard)
+            createTab(node->l_son,tab);
+
+        tab[node->index] = node->name;
+
+        if(node->r_son != NULL && node->r_son != guard)
+            createTab(node->r_son,tab);
+    }
+
+    Node * find(string name, Node * node){
+        if(name.compare(node->name) == 0){
+            return node;
+        }
+        if(name.compare(node->name) < 0){
+            return find(name,node->l_son);
+        }
+        return find(name,node->r_son);
+    }
+
+    void rotateLeft(Node * node){
+        Node * tmp = node->r_son;
+        node->r_son = tmp->l_son;
+        if (tmp->l_son != guard){
+            tmp->l_son->father = node;
+        }
+        tmp->father = node->father;
+        if (node->father == NULL){
+            this->root = tmp;
+        }
+        else if(node == node->father->l_son){
+            node->father->l_son = tmp;
+        }
+        else{
+            node->father->r_son = tmp;
+        }
+        tmp->l_son = node;
+        node->father = tmp;
+    }
+
+    void rotateRight(Node * node){
+        Node * tmp = node->l_son;
+        node->l_son = tmp->r_son;
+        if (tmp->r_son != guard){
+            tmp->r_son->father = node;
+        }
+        tmp->father = node->father;
+        if(node->father == NULL){
+            this->root = tmp;
+        }
+        else if(node == node->father->r_son){
+            node->father->r_son = tmp;
+        }
+        else{
+            node->father->l_son = tmp;
+        }
+        tmp->r_son = node;
+        node->father = tmp;
+    }
+
+    void fixTree(Node * node){
+        Node *  tmp;
+        while(node->father->color == 1){
+            if(node->father == node->father->father->r_son){
+                tmp = node->father->father->l_son;
+                if(tmp->color == 1){
+                    tmp->color = 0;
+                    node->father->color = 0;
+                    node->father->father->color = 1;
+                    node = node->father->father;
+                }
+                else{
+                    if(node == node->father->l_son){
+                        node = node->father;
+                        rotateRight(node);
+                    }
+                    node->father->color = 0;
+                    node->father->father->color = 1;
+                    rotateLeft(node->father->father);
+                }
+            }
+            else{
+                tmp = node->father->father->r_son;
+                if(tmp->color == 1){
+                    tmp->color = 0;
+                    node->father->color = 0;
+                    node->father->father->color = 1;
+                    node = node->father->father;
+                }
+                else{
+                    if(node == node->father->r_son){
+                        node = node->father;
+                        rotateLeft(node);
+                    }
+                    node->father->color = 0;
+                    node->father->father->color = 1;
+                    rotateRight(node->father->father);
+                }
+            }
+            if(node == root){
+                break;
+            }
+        }
+        root->color = 0;
+    }
+    void add(Node * node){
+        size++;
+        node->l_son = node->r_son = guard;
+        Node * b = nullptr;
+        Node * a = this->root;
+
+        while(a != guard){
+            b = a;
+            if(node->name.compare(a->name) < 0){
+                a = a->l_son;
+            }
+            else{
+                a = a->r_son;
+            }
+        }
+        node->father = b;
+        if(b == NULL){
+            root = node;
+        }
+        else if(node->name.compare(b->name) < 0){
+            b->l_son = node;
+        }
+        else{
+            b->r_son = node;
+        }
+        if(node->father == NULL){
+            node->color = 0;
+            return;
+        }
+        if(node->father->father == NULL){
+            return;
+        }
+        fixTree(node);
+    }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    int n; //amount people
+    int m; //amount operation
+    int ind=0;
+    int i1, i2;
+    char c;
+    string  s1,s2;
+    int x;
+    cin >> n;
+
+    unsigned short * fastIndex = new unsigned short[60000];
+    RBTree * rbTree = new RBTree;
+    for(int i=0; i<n; i++){
+        Node * n = new Node;
+        cin >> n->name;
+        n->index = fastIndex[ind-1] = ind++;
+        rbTree->add(n);
+    }
+
+    cin >> m;
+
+    for(int i=0; i<m; i++){
+        cin >> c;
+        if(c == 'a'){
+            Node * n = new Node;
+            cin >> n->name;
+            n->index = fastIndex[ind-1] = ind++;
+
+            rbTree->add(n);
+        }
+        else if(c == 'r'){
+            cin >> s1 >> s2;
+            i1 = rbTree->find(s1,rbTree->getRoot())->index;
+            i2 = rbTree->find(s2,rbTree->getRoot())->index;
+            x = fastIndex[i1];
+            fastIndex[i1] = fastIndex[i2];
+            fastIndex[i2] = x;
+        }
+        else{
+            cin >> s1 >> x;
+             Node *tmp = rbTree->find(s1,rbTree->getRoot());
+            modifyIndex(tmp,fastIndex[tmp->index] - x,fastIndex[tmp->index],fastIndex,rbTree->getSize());
+        }
+    }
+
+    string * allValue = new string[rbTree->getSize()];
+    rbTree->modifyAllIndex(rbTree->getRoot(),fastIndex);
+    rbTree->createTab(rbTree->getRoot(),allValue);
+    for(int i=0; i<rbTree->getSize(); i++){
+        cout << allValue[i] << endl;
+    }
+
+    return 0;
+}
