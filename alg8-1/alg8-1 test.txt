@@ -1,0 +1,10 @@
+5
+Okruszek 0.5
+Tester 0.7
+Interfejs 0.2
+Agent 0.4
+Scyzoryk 0.3
+3
+m 0.7 0.7
+m 0.7 0.8
+m 0.8 1.6

@@ -1,0 +1,294 @@
+#include<iostream>
+using namespace std;
+
+struct Pair{
+    float ratio;
+    string name;
+};
+
+class Node{
+    Pair* brothers;
+    Node** sons;
+    int t;
+    int size;
+    bool leaf;
+public:
+    Node(int t, bool leaf){
+        this->t = t;
+        this->leaf = leaf;
+        brothers = new Pair[2*t-1];
+        sons = new Node *[2*t];
+        size = 0;
+    }
+
+    Pair * getBrothers(){return brothers;}
+
+    void notFull(float ratio, string name){
+        int i=size-1;
+        if (leaf == true){
+            while(i>=0 && brothers[i].ratio < ratio){
+                brothers[i+1] = brothers[i];
+                i--;
+            }
+            brothers[i+1].ratio = ratio;
+            brothers[i+1].name = name;
+            size++;
+        }else{
+            while(i>=0 && brothers[i].ratio < ratio)
+                i--;
+            if(sons[i+1]->size == 2*t-1){
+                splitNode(i+1, sons[i+1]);
+                if(brothers[i+1].ratio > ratio)
+                    i++;
+            }
+            sons[i+1]->notFull(ratio,name);
+        }
+    }
+
+    void splitNode(int i, Node *node){
+        Node *a = new Node(node->t, node->leaf);
+        a->size = t-1;
+        for(int j=0; j<t-1; j++)
+            a->brothers[j] = node->brothers[j+t];
+        if(node->leaf == false)
+            for(int j=0; j<t; j++)
+                a->sons[j] = node->sons[j+t];
+        node->size = t-1;
+        for(int j=size; j>=i+1; j--)
+            sons[j+1] = sons[j];
+        sons[i+1] = a;
+        for(int j=size-1; j>=i; j--)
+            brothers[j+1] = brothers[j];
+        brothers[i] = node->brothers[t-1];
+        size++;
+    }
+
+    void fromR1toR2(float r1, float r2){
+        int i;
+        for(i=0; i<size; i++){
+            if(leaf == false)
+                sons[i]->fromR1toR2(r1,r2);
+            if(brothers[i].ratio >= r1 && brothers[i].ratio <= r2)
+                cout << brothers[i].name<<endl;
+        }
+        if(leaf == false)
+            sons[i]->fromR1toR2(r1,r2);
+    }
+    void merge(int index){
+        Node *child = sons[index];
+        Node *sibling = sons[index+1];
+        child->brothers[t-1] = brothers[index];
+        for (int i=0; i<sibling->size; i++)
+            child->brothers[i+t] = sibling->brothers[i];
+        if(!child->leaf){
+            for(int i=0; i<=sibling->size; i++)
+                child->sons[i+t] = sibling->sons[i];
+        }
+        for(int i=index+1; i<size; i++)
+            brothers[i-1] = brothers[i];
+        for(int i=index+2; i<=size; i++)
+            sons[i-1] = sons[i];
+        child->size += sibling->size+1;
+        size--;
+        delete(sibling);
+        return;
+    }
+
+    Pair getPred(int index){
+        Node *cur=sons[index];
+        while (!cur->leaf)
+            cur = cur->sons[cur->size];
+        return cur->brothers[cur->size-1];
+    }
+    Pair getSucc(int idx){
+        Node *cur = sons[idx+1];
+        while (!cur->leaf)
+            cur = cur->sons[0];
+        return cur->brothers[0];
+    }
+    void removeFromNonLeaf(int index, bool n){
+        float  r = brothers[index].ratio;
+        if(sons[index]->size >= t){
+            Pair pred = getPred(index);
+            brothers[index].ratio = pred.ratio;
+            brothers[index].name = pred.name;
+            sons[index]->remove(pred.ratio, n);
+        }
+        else if(sons[index+1]->size >= t){
+            Pair succ = getSucc(index);
+            brothers[index].ratio = succ.ratio;
+            brothers[index].name = succ.name;
+            sons[index+1]->remove(succ.ratio, n);
+        }else{
+            merge(index);
+            sons[index]->remove(r, n);
+        }
+        return;
+    }
+
+    void removeFromLeaf(int idx){
+        for(int i=idx+1; i<size; i++)
+            brothers[i-1] = brothers[i];
+        size--;
+        return;
+    }
+    int findKey(float r) {
+        int index=0;
+        while (index<size && brothers[index].ratio > r)
+            index++;
+        return index;
+    }
+
+    void takeFromPrev(int index){
+        Node *child=sons[index];
+        Node *sibling=sons[index-1];
+        for(int i=child->size-1; i>=0; --i)
+            child->brothers[i+1] = child->brothers[i];
+        if(!child->leaf){
+            for(int i=child->size; i>=0; --i)
+                child->sons[i+1] = child->sons[i];
+        }
+        child->brothers[0] = brothers[index-1];
+        if(!child->leaf)
+            child->sons[0] = sibling->sons[sibling->size];
+        brothers[index-1] = sibling->brothers[sibling->size-1];
+        child->size += 1;
+        sibling->size -= 1;
+        return;
+    }
+
+    void takeFromNext(int index) {
+        Node *child=sons[index];
+        Node *sibling=sons[index+1];
+        child->brothers[(child->size)] = brothers[index];
+        if(!(child->leaf))
+            child->sons[(child->size)+1] = sibling->sons[0];
+        brothers[index] = sibling->brothers[0];
+        for(int i=1; i<sibling->size; ++i)
+            sibling->brothers[i-1] = sibling->brothers[i];
+        if(!sibling->leaf) {
+            for(int i=1; i<=sibling->size; ++i)
+                sibling->sons[i-1] = sibling->sons[i];
+        }
+        child->size += 1;
+        sibling->size -= 1;
+        return;
+    }
+
+    void fill(int index) {
+        if(index!=0 && sons[index-1]->size>=t)
+            takeFromPrev(index);
+        else if(index!=size && sons[index+1]->size>=t)
+            takeFromNext(index);
+        else{
+            if(index != size)
+                merge(index);
+            else
+                merge(index-1);
+        }
+        return;
+    }
+
+    string remove(float r, bool &findName){
+        static string name;
+        int index = findKey(r);
+        if(index<size && brothers[index].ratio == r){
+            if(findName == true){
+                name = brothers[index].name;
+                findName = false;
+            }
+            if(leaf)
+                removeFromLeaf(index);
+            else
+                removeFromNonLeaf(index, findName);
+        }else{
+            bool flag = ((index!=size)? false : true);
+            if(sons[index]->size < t)
+                fill(index);
+            if(flag && index > size)
+                sons[index-1]->remove(r, findName);
+            else
+                sons[index]->remove(r, findName);
+        }
+        return name;
+    }
+    friend class BTree;
+};
+
+class BTree{
+    Node *root;
+    int t;
+public:
+    BTree(int _t){  root = NULL;  t = _t; }
+    void fromR1toR2(float r1, float r2){root->fromR1toR2(r1,r2);}
+    void add(float k, string name){
+        if(root == NULL){
+            root = new Node(t, true);
+            root->brothers[0].ratio = k;
+            root->brothers[0].name = name;
+            root->size = 1;
+        }else{
+            if(root->size == 2*t-1){
+                Node *node = new Node(t, false);
+                node->sons[0] = root;
+                node->splitNode(0, root);
+                int i = 0;
+                if(node->brothers[0].ratio > k)
+                    i++;
+                node->sons[i]->notFull(k,name);
+                root = node;
+            }else
+                root->notFull(k,name);
+        }
+    }
+    string remove(float r, bool & findName){
+        string name;
+        name = root->remove(r, findName);
+        if (root->size==0) {
+            Node *tmp = root;
+            if (root->leaf)
+                root = NULL;
+            else
+                root = root->sons[0];
+            delete tmp;
+        }
+        return name;
+    }
+};
+
+int main(){
+ios_base::sync_with_stdio(false);
+    int n; //amount people
+    int m; //amount operation
+    char c;
+    float r1, r2;
+    string name;
+    int t=20;
+
+    cin >> n;
+
+    BTree * bTree = new BTree(t);
+    for(int i=0; i<n; i++){
+    cin >> name >> r1;
+        bTree->add(r1,name);
+    }
+
+    cin >> m;
+
+    for(int i=0; i<m; i++){
+        cin >> c;
+        if(c == 'a'){
+            cin >> name >> r1;
+            bTree->add(r1,name);
+        }else if(c == 'm'){
+            cin >> r1 >> r2;
+            bool findName = true;
+            name = bTree->remove(r1,findName);
+            bTree->add(r2,name);
+        }else{
+            cin >> r1 >> r2;
+            bTree->fromR1toR2(r1,r2);
+        }
+    }
+    return 0;
+}

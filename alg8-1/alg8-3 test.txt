@@ -1,0 +1,63 @@
+23
+alicja 1
+marcysia 12
+rafal 6
+mateusz 4
+karolina 10
+monika 11
+emilka 16
+kacper 9
+michal 2
+kasia 3
+gosia 15
+wanda 13
+wiktoria 14
+radoslaw 18
+dariusz 19
+waldek 8
+nikola 17
+janusz 5
+jan 20
+jasiek 21
+natalka 7
+maciek 22
+kuba 23
+38
+a weronika 25
+a oliwia 24
+a kamil 26
+a iwona 27
+s 1 30
+m 25 30
+m 30 29
+m 15 39
+m 39 31
+m 1 100
+m 2 101
+m 3 103
+m 4 102
+m 5 55
+m 6 88
+m 88 89
+m 89 90
+m 90 88
+m 88 89
+m 89 88
+m 8 59
+m 59 60
+m 60 8
+s 1 150
+m 10 110
+m 110 10
+m 8 111
+m 111 112
+m 112 113
+m 113 112
+m 112 111
+s 1 150
+m 12 40
+m 20 12
+m 88 20
+m 18 15
+m 17 18
+s 1 150
