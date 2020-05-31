@@ -1,0 +1,75 @@
+28
+d
+z 1
+u 1
+d
+z 2
+u 2
+d 
+z 3
+u 3
+d  
+z 4
+u 4
+z  
+u 4
+z 
+u 3
+d  
+z 5
+u 5
+d 
+z 6
+u 6
+w
+z 1
+w
+z 2
+w
+z 3
+d  
+z 7
+u 7
+d  
+z 8
+u 8
+d
+z 9
+u 9
+d
+z 10
+u 10
+d
+z 1
+u 2
+d
+z 1
+u 3
+d  
+z 1
+u 4
+d  
+z 1
+u 5
+d 
+z 7
+u 1
+d  
+z 8
+u 1
+w 
+z 1
+w 
+z 2
+z  
+u 1
+d 
+z 9
+u 1
+d  
+z 10
+u 1
+z 
+u 1
+z
+u 1
